@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#0381FE</color>
-
-    <!-- One UI 9 Light Palette -->
     <color name="oneui_bg">#F2F2F7</color>
     <color name="oneui_card_bg">#FFFFFF</color>
     <color name="oneui_blue">#0381FE</color>
@@ -15,7 +13,6 @@
     <color name="oneui_divider">#ECECF0</color>
     <color name="oneui_track_bg">#E6EAF2</color>
     <color name="oneui_chevron">#B0B0B8</color>
-
     <color name="oneui_badge_blue_bg">#E8F2FF</color>
     <color name="oneui_badge_ok_bg">#E6F7EE</color>
     <color name="oneui_badge_warn_bg">#FFF3E0</color>

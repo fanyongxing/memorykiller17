@@ -1,61 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootCoordinator"
+    android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/oneui_bg">
+    android:background="@color/oneui_bg"
+    android:orientation="vertical">
 
-    <!-- One UI 9 标志性大留白折叠标题栏 -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+    <!-- 精简至 50dp 的 One UI 9 顶部标题栏 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/oneui_bg"
-        app:elevation="0dp"
-        app:liftOnScroll="false">
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="104dp"
-            app:collapsedTitleGravity="start|center_vertical"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.OneUI9.CollapsedTitle"
-            app:contentScrim="@color/oneui_bg"
-            app:expandedTitleGravity="center_horizontal|bottom"
-            app:expandedTitleMarginBottom="14dp"
-            app:expandedTitleTextAppearance="@style/TextAppearance.OneUI9.ExpandedTitle"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:title="@string/app_name">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollContent"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="28dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="12dp">
 
-            <!-- 1. One UI 设备维护风格：核心内存仪表盘卡片 -->
+            <!-- 1. 紧凑型内存卡片（已移除“立即极限清场”按钮，刷新按钮置于空白右侧） -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/oneui_card_bg"
-                app:cardCornerRadius="26dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -63,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="22dp">
+                    android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -71,10 +59,9 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <!-- 环形进度仪表盘 -->
                         <FrameLayout
-                            android:layout_width="96dp"
-                            android:layout_height="96dp">
+                            android:layout_width="76dp"
+                            android:layout_height="76dp">
 
                             <com.google.android.material.progressindicator.CircularProgressIndicator
                                 android:id="@+id/ringRamProgress"
@@ -83,10 +70,10 @@
                                 android:layout_gravity="center"
                                 android:max="100"
                                 app:indicatorColor="@color/oneui_blue"
-                                app:indicatorSize="92dp"
+                                app:indicatorSize="72dp"
                                 app:trackColor="@color/oneui_track_bg"
-                                app:trackCornerRadius="8dp"
-                                app:trackThickness="9dp" />
+                                app:trackCornerRadius="6dp"
+                                app:trackThickness="7dp" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -101,7 +88,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="0%"
                                     android:textColor="@color/oneui_text_primary"
-                                    android:textSize="20sp"
+                                    android:textSize="16sp"
                                     android:textStyle="bold" />
 
                                 <TextView
@@ -110,16 +97,15 @@
                                     android:layout_height="wrap_content"
                                     android:text="良好"
                                     android:textColor="@color/oneui_blue"
-                                    android:textSize="11sp"
+                                    android:textSize="10sp"
                                     android:textStyle="bold" />
                             </LinearLayout>
                         </FrameLayout>
 
-                        <!-- 右侧内存参数 -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="20dp"
+                            android:layout_marginStart="14dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -128,26 +114,25 @@
                                 android:layout_height="wrap_content"
                                 android:text="运行内存"
                                 android:textColor="@color/oneui_text_secondary"
-                                android:textSize="13sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/tvRamPrimary"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
                                 android:text="-- / -- GB"
                                 android:textColor="@color/oneui_text_primary"
-                                android:textSize="21sp"
+                                android:textSize="19sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/tvRamAvailable"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="2dp"
                                 android:text="可用 -- GB"
                                 android:textColor="@color/oneui_blue"
-                                android:textSize="13sp"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -155,7 +140,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="10dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -164,7 +149,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="RAM Plus (ZRAM)：读取中…"
+                            android:text="RAM Plus：读取中…"
                             android:textColor="@color/oneui_text_secondary"
                             android:textSize="12sp" />
 
@@ -172,7 +157,7 @@
                             android:id="@+id/btnRefreshIcon"
                             style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="wrap_content"
-                            android:layout_height="34dp"
+                            android:layout_height="32dp"
                             android:layout_marginStart="8dp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
@@ -184,50 +169,33 @@
                             android:textSize="12sp"
                             android:textStyle="bold"
                             app:backgroundTint="@color/oneui_badge_blue_bg"
-                            app:cornerRadius="17dp"
+                            app:cornerRadius="16dp"
                             app:icon="@drawable/ic_oneui_refresh"
                             app:iconGravity="textStart"
                             app:iconPadding="4dp"
-                            app:iconSize="15dp"
+                            app:iconSize="14dp"
                             app:iconTint="@color/oneui_blue" />
                     </LinearLayout>
-
-                    <!-- One UI 标志性蓝色胶囊主按钮 -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnQuickClean"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="14dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:text="立即极限清场"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="@color/oneui_blue"
-                        app:cornerRadius="26dp"
-                        app:elevation="0dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 分组小标题 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="5dp"
                 android:text="清理引擎模式"
                 android:textColor="@color/oneui_section_header"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <!-- 2. One UI 分组式设置列表卡片（三种吃内存方案 + 备用） -->
+            <!-- 2. 四种清理引擎卡片（整体上提，紧凑单屏） -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/oneui_card_bg"
-                app:cardCornerRadius="26dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -236,7 +204,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- 方案 1：原版引擎 -->
                     <LinearLayout
                         android:id="@+id/rowOrigEngine"
                         android:layout_width="match_parent"
@@ -245,25 +212,25 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="68dp"
+                        android:minHeight="56dp"
                         android:orientation="horizontal"
-                        android:paddingStart="18dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="18dp"
-                        android:paddingBottom="12dp">
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:background="@drawable/bg_oneui_squircle_blue"
-                            android:padding="9dp"
+                            android:padding="7dp"
                             android:src="@drawable/ic_oneui_bolt"
                             app:tint="#FFFFFF" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -272,20 +239,19 @@
                                 android:layout_height="wrap_content"
                                 android:text="原版引擎清场"
                                 android:textColor="@color/oneui_text_primary"
-                                android:textSize="16sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
                                 android:text="100% 原版 libhello-jni.so · 还原旧版逻辑"
                                 android:textColor="@color/oneui_text_secondary"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_oneui_chevron"
                             app:tint="@color/oneui_chevron" />
                     </LinearLayout>
@@ -293,11 +259,10 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="72dp"
-                        android:layout_marginEnd="18dp"
+                        android:layout_marginStart="62dp"
+                        android:layout_marginEnd="16dp"
                         android:background="@color/oneui_divider" />
 
-                    <!-- 方案 2：独立 mmap 高熵引擎 -->
                     <LinearLayout
                         android:id="@+id/rowMmapEngine"
                         android:layout_width="match_parent"
@@ -306,25 +271,25 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="68dp"
+                        android:minHeight="56dp"
                         android:orientation="horizontal"
-                        android:paddingStart="18dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="18dp"
-                        android:paddingBottom="12dp">
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:background="@drawable/bg_oneui_squircle_teal"
-                            android:padding="9dp"
+                            android:padding="7dp"
                             android:src="@drawable/ic_oneui_memory"
                             app:tint="#FFFFFF" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -333,20 +298,19 @@
                                 android:layout_height="wrap_content"
                                 android:text="独立 mmap 高熵引擎"
                                 android:textColor="@color/oneui_text_primary"
-                                android:textSize="16sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
                                 android:text="6 线程不可压缩随机数据 · 专克 RAM Plus / ZRAM"
                                 android:textColor="@color/oneui_text_secondary"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_oneui_chevron"
                             app:tint="@color/oneui_chevron" />
                     </LinearLayout>
@@ -354,11 +318,10 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="72dp"
-                        android:layout_marginEnd="18dp"
+                        android:layout_marginStart="62dp"
+                        android:layout_marginEnd="16dp"
                         android:background="@color/oneui_divider" />
 
-                    <!-- 方案 3：双引擎极限清场 -->
                     <LinearLayout
                         android:id="@+id/rowDualEngine"
                         android:layout_width="match_parent"
@@ -367,25 +330,25 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="68dp"
+                        android:minHeight="56dp"
                         android:orientation="horizontal"
-                        android:paddingStart="18dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="18dp"
-                        android:paddingBottom="12dp">
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:background="@drawable/bg_oneui_squircle_purple"
-                            android:padding="9dp"
+                            android:padding="7dp"
                             android:src="@drawable/ic_oneui_rocket"
                             app:tint="#FFFFFF" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -394,20 +357,19 @@
                                 android:layout_height="wrap_content"
                                 android:text="原版 + mmap 双引擎极限清场"
                                 android:textColor="@color/oneui_text_primary"
-                                android:textSize="16sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
                                 android:text="双引擎满载 · 彻底清空后台并触发桌面重启"
                                 android:textColor="@color/oneui_text_secondary"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_oneui_chevron"
                             app:tint="@color/oneui_chevron" />
                     </LinearLayout>
@@ -415,11 +377,10 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="72dp"
-                        android:layout_marginEnd="18dp"
+                        android:layout_marginStart="62dp"
+                        android:layout_marginEnd="16dp"
                         android:background="@color/oneui_divider" />
 
-                    <!-- 备用：系统级 am kill-all -->
                     <LinearLayout
                         android:id="@+id/rowSafeKillAll"
                         android:layout_width="match_parent"
@@ -428,25 +389,25 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="68dp"
+                        android:minHeight="56dp"
                         android:orientation="horizontal"
-                        android:paddingStart="18dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="18dp"
-                        android:paddingBottom="12dp">
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp">
 
                         <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:background="@drawable/bg_oneui_squircle_green"
-                            android:padding="9dp"
+                            android:padding="7dp"
                             android:src="@drawable/ic_oneui_shield"
                             app:tint="#FFFFFF" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="12dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -455,44 +416,32 @@
                                 android:layout_height="wrap_content"
                                 android:text="系统级安全清理"
                                 android:textColor="@color/oneui_text_primary"
-                                android:textSize="16sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
                                 android:text="执行 am kill-all · 温和回收后台缓存不重启桌面"
                                 android:textColor="@color/oneui_text_secondary"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_oneui_chevron"
                             app:tint="@color/oneui_chevron" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 分组小标题 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginBottom="8dp"
-                android:text="权限与系统守护"
-                android:textColor="@color/oneui_section_header"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <!-- 3. Shizuku 与 Android 17 Memory Limiter 状态卡片 -->
+            <!-- 3. 紧凑型 Shizuku 与 Limiter 状态卡片 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 app:cardBackgroundColor="@color/oneui_card_bg"
-                app:cardCornerRadius="26dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -500,7 +449,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="14dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -511,9 +460,9 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Shizuku 守护服务"
+                            android:text="Shizuku 守护"
                             android:textColor="@color/oneui_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -522,10 +471,10 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:background="@drawable/bg_oneui_pill_badge"
-                            android:paddingStart="10dp"
-                            android:paddingTop="3dp"
-                            android:paddingEnd="10dp"
-                            android:paddingBottom="3dp"
+                            android:paddingStart="8dp"
+                            android:paddingTop="2dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="2dp"
                             android:text="检测中"
                             android:textSize="11sp"
                             android:textStyle="bold" />
@@ -539,64 +488,47 @@
                             android:id="@+id/btnRequestShizuku"
                             style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="wrap_content"
-                            android:layout_height="36dp"
+                            android:layout_height="30dp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
                             android:minWidth="0dp"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="14dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
                             android:text="授权"
                             android:textColor="@color/oneui_blue"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textStyle="bold"
                             app:backgroundTint="@color/oneui_badge_blue_bg"
-                            app:cornerRadius="18dp" />
+                            app:cornerRadius="15dp" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvShizukuDesc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="4dp"
                         android:text="正在检查 Shizuku 状态…"
                         android:textColor="@color/oneui_text_secondary"
-                        android:textSize="13sp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@color/oneui_divider" />
+                        android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/tvLimiterStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Android 17 Memory Limiter：连接 Shizuku 后显示"
+                        android:layout_marginTop="3dp"
+                        android:text="Memory Limiter：连接 Shizuku 后显示"
                         android:textColor="@color/oneui_text_secondary"
-                        android:textSize="12sp" />
+                        android:textSize="11sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 分组小标题 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginBottom="8dp"
-                android:text="运行记录"
-                android:textColor="@color/oneui_section_header"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <!-- 4. 运行日志卡片 -->
+            <!-- 4. 紧凑日志卡片 -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 app:cardBackgroundColor="@color/oneui_card_bg"
-                app:cardCornerRadius="26dp"
+                app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -604,12 +536,14 @@
                     android:id="@+id/tvLog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
                     android:fontFamily="monospace"
-                    android:lineSpacingExtra="4dp"
-                    android:padding="18dp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="4"
+                    android:padding="12dp"
                     android:text="等待操作"
                     android:textColor="@color/oneui_text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -617,16 +551,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="8dp"
+                android:padding="6dp"
                 android:text="MemoryKiller 17 · v0.2  🔗 GitHub 发布页"
                 android:textColor="@color/oneui_blue"
                 android:textSize="12sp" />
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </ScrollView>
+</LinearLayout>

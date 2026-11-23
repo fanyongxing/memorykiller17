@@ -1,23 +1,12 @@
-# Gradle & build outputs
 .gradle/
 build/
 app/build/
-captures/
-*.apk
-*.aab
-*.ap_
-
-# Local configuration & IDE
+app/.cxx/
 local.properties
 .idea/
 *.iml
-.DS_Store
-Thumbs.db
-
-# Keystores & signing secrets (NEVER commit!)
+*.apk
+*.aab
 *.jks
 *.keystore
-keystore.properties
-
-# Native C++ build cache
-app/.cxx/
+.DS_Store

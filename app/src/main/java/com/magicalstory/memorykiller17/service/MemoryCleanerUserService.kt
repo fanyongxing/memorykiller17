@@ -3,114 +3,78 @@ package com.magicalstory.memorykiller17.service
 import android.content.Context
 import androidx.annotation.Keep
 import com.magicalstory.memorykiller17.IMemoryCleanerService
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 @Keep
 class MemoryCleanerUserService : IMemoryCleanerService.Stub {
-
-    @Keep
-    constructor() : super()
-
-    @Keep
-    constructor(@Suppress("UNUSED_PARAMETER") context: Context) : super()
+    @Keep constructor() : super()
+    @Keep constructor(@Suppress("UNUSED_PARAMETER") context: Context) : super()
 
     private val watchdogActive = AtomicBoolean(false)
 
     override fun destroy() {
         watchdogActive.set(false)
-        execCommand(arrayOf("am", "memory-limiter", "ignore", "none"))
+        exec("am", "memory-limiter", "ignore", "none")
         exitProcess(0)
     }
 
     override fun prepareEatAndWatch(uid: Int, hostPid: Int, returnHomeOnExit: Boolean): String {
-        val res = execCommand(arrayOf("am", "memory-limiter", "ignore", uid.toString()))
-        startHostWatchdog(hostPid, returnHomeOnExit)
-        return if (res.exitCode == 0) {
-            "已解除 UID $uid 的 Memory Limiter 限制，退出后将自动恢复并回桌面"
-        } else {
-            "Memory Limiter 未开启或跳过 (code=${res.exitCode})，已开启退出回桌面守护"
-        }
+        val (code, _) = exec("am", "memory-limiter", "ignore", uid.toString())
+        startWatchdog(hostPid, returnHomeOnExit)
+        return if (code == 0) "已解除 UID $uid 限制，已开启自动恢复与回桌面守护"
+        else "当前固件未开启 Memory Limiter，已开启退出回桌面守护"
     }
 
     override fun restoreMemoryLimiter(): String {
         watchdogActive.set(false)
-        val res = execCommand(arrayOf("am", "memory-limiter", "ignore", "none"))
-        return if (res.exitCode == 0) {
-            "已恢复 Android 17 Memory Limiter 默认限制"
-        } else {
-            "恢复限制返回 (code=${res.exitCode}): ${res.output.trim()}"
-        }
+        val (code, out) = exec("am", "memory-limiter", "ignore", "none")
+        return if (code == 0) "已恢复 Memory Limiter 默认限制" else "恢复返回($code): $out"
     }
 
     override fun getMemoryLimiterStatus(): String {
-        val res = execCommand(arrayOf("am", "memory-limiter", "status"))
-        return if (res.exitCode == 0 && res.output.isNotBlank()) {
-            res.output.trim()
-        } else {
-            "disabled（当前固件未启用）"
-        }
+        val (code, out) = exec("am", "memory-limiter", "status")
+        return if (code == 0 && out.isNotBlank()) out else "disabled"
     }
 
     override fun runSafeClean(): String {
-        val res = execCommand(arrayOf("am", "kill-all"))
-        return if (res.exitCode == 0) {
-            "已执行系统级 am kill-all"
-        } else {
-            "am kill-all 失败 (code=${res.exitCode}): ${res.output.trim()}"
-        }
+        val (code, out) = exec("am", "kill-all")
+        return if (code == 0) "已执行系统级 am kill-all" else "执行失败($code): $out"
     }
 
-    private fun startHostWatchdog(hostPid: Int, returnHomeOnExit: Boolean) {
+    private fun startWatchdog(hostPid: Int, returnHomeOnExit: Boolean) {
         if (hostPid <= 0) return
         watchdogActive.set(false)
         Thread.sleep(40)
         watchdogActive.set(true)
         thread(isDaemon = true, name = "limiter-watchdog") {
-            val procDir = File("/proc/$hostPid")
+            val proc = File("/proc/$hostPid")
             while (watchdogActive.get()) {
-                if (!procDir.exists()) {
-                    execCommand(arrayOf("am", "memory-limiter", "ignore", "none"))
+                if (!proc.exists()) {
+                    exec("am", "memory-limiter", "ignore", "none")
                     if (returnHomeOnExit) {
-                        execCommand(
-                            arrayOf(
-                                "am", "start",
-                                "-a", "android.intent.action.MAIN",
-                                "-c", "android.intent.category.HOME",
-                                "--activity-reset-task-if-needed"
-                            )
+                        exec(
+                            "am", "start",
+                            "-a", "android.intent.action.MAIN",
+                            "-c", "android.intent.category.HOME",
+                            "--activity-reset-task-if-needed"
                         )
                     }
                     watchdogActive.set(false)
                     break
                 }
-                try {
-                    Thread.sleep(250)
-                } catch (_: InterruptedException) {
-                    break
-                }
+                try { Thread.sleep(250) } catch (_: InterruptedException) { break }
             }
         }
     }
 
-    private data class CommandResult(val exitCode: Int, val output: String)
-
-    private fun execCommand(cmd: Array<String>): CommandResult {
-        return try {
-            val process = ProcessBuilder(*cmd)
-                .redirectErrorStream(true)
-                .start()
-            val output = BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                reader.readText()
-            }
-            val code = process.waitFor()
-            CommandResult(code, output)
-        } catch (e: Exception) {
-            CommandResult(-1, e.message ?: e.javaClass.simpleName)
-        }
+    private fun exec(vararg cmd: String): Pair<Int, String> = try {
+        val p = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+        val out = p.inputStream.bufferedReader().use { it.readText().trim() }
+        p.waitFor() to out
+    } catch (e: Exception) {
+        -1 to (e.message ?: "error")
     }
 }
