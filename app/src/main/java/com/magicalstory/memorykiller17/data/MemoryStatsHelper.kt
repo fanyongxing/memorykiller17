@@ -55,10 +55,10 @@ object MemoryStatsHelper {
         return if (parts.size >= 2) parts[1].toLongOrNull() ?: 0L else 0L
     }
 
-    fun formatMb(bytes: Long): String {
+    fun formatGb(bytes: Long): String {
         val mb = bytes / (1024.0 * 1024.0)
         return if (mb >= 1024.0) {
-            String.format("%.2f GB", mb / 1024.0)
+            String.format("%.1f GB", mb / 1024.0)
         } else {
             String.format("%.0f MB", mb)
         }

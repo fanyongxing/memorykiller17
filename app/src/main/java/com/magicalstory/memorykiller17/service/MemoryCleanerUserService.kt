@@ -31,9 +31,9 @@ class MemoryCleanerUserService : IMemoryCleanerService.Stub {
         val res = execCommand(arrayOf("am", "memory-limiter", "ignore", uid.toString()))
         startHostWatchdog(hostPid, returnHomeOnExit)
         return if (res.exitCode == 0) {
-            "已对本应用 UID $uid 临时解除 Memory Limiter，并启动退出自动恢复与回桌面守护。"
+            "已解除 UID $uid 的 Memory Limiter 限制，退出后将自动恢复并回桌面"
         } else {
-            "Memory Limiter 指令返回 (code=${res.exitCode}): ${res.output.trim()}（已启动退出回桌面守护）。"
+            "Memory Limiter 未开启或跳过 (code=${res.exitCode})，已开启退出回桌面守护"
         }
     }
 
@@ -41,7 +41,7 @@ class MemoryCleanerUserService : IMemoryCleanerService.Stub {
         watchdogActive.set(false)
         val res = execCommand(arrayOf("am", "memory-limiter", "ignore", "none"))
         return if (res.exitCode == 0) {
-            "已恢复 Android 17 Memory Limiter 默认限制 (ignore none)。"
+            "已恢复 Android 17 Memory Limiter 默认限制"
         } else {
             "恢复限制返回 (code=${res.exitCode}): ${res.output.trim()}"
         }
@@ -52,14 +52,14 @@ class MemoryCleanerUserService : IMemoryCleanerService.Stub {
         return if (res.exitCode == 0 && res.output.isNotBlank()) {
             res.output.trim()
         } else {
-            "未获取到 Memory Limiter 状态：${res.output.trim()}"
+            "disabled（当前固件未启用）"
         }
     }
 
     override fun runSafeClean(): String {
         val res = execCommand(arrayOf("am", "kill-all"))
         return if (res.exitCode == 0) {
-            "已执行系统级 am kill-all。"
+            "已执行系统级 am kill-all"
         } else {
             "am kill-all 失败 (code=${res.exitCode}): ${res.output.trim()}"
         }

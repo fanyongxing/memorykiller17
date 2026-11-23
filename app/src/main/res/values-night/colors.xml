@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#0381FE</color>
+
+    <!-- One UI 9 True AMOLED Dark Palette -->
+    <color name="oneui_bg">#010101</color>
+    <color name="oneui_card_bg">#17171A</color>
+    <color name="oneui_blue">#3E91FF</color>
+    <color name="oneui_success">#34C77B</color>
+    <color name="oneui_warning">#FFA726</color>
+    <color name="oneui_danger">#FF5252</color>
+    <color name="oneui_text_primary">#FAFAFA</color>
+    <color name="oneui_text_secondary">#9A9AA3</color>
+    <color name="oneui_section_header">#8E8E96</color>
+    <color name="oneui_divider">#28282D</color>
+    <color name="oneui_track_bg">#262A34</color>
+    <color name="oneui_chevron">#5C5C66</color>
+
+    <color name="oneui_badge_blue_bg">#162A45</color>
+    <color name="oneui_badge_ok_bg">#143324</color>
+    <color name="oneui_badge_warn_bg">#382612</color>
+    <color name="oneui_badge_neutral_bg">#25252A</color>
+</resources>

@@ -1,14 +1,19 @@
 package com.magicalstory.memorykiller17
 
 import android.content.ComponentName
+import android.content.Intent
+import android.net.Uri
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Process
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -85,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                         appendLog("Shizuku 授权成功，正在绑定特权服务…")
                         tryBindUserServiceIfPermitted()
                     } else {
-                        appendLog("Shizuku 权限被拒绝，请在 Shizuku 应用中允许本应用。")
+                        appendLog("Shizuku 权限被拒绝，请在 Shizuku 中允许本应用。")
                     }
                     updateShizukuStatusUi()
                 }
@@ -98,9 +103,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.rootContainer) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootCoordinator) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            binding.appBar.setPadding(0, bars.top, 0, 0)
+            binding.scrollContent.setPadding(
+                binding.scrollContent.paddingLeft,
+                binding.scrollContent.paddingTop,
+                binding.scrollContent.paddingRight,
+                bars.bottom + resources.getDimensionPixelSize(R.dimen.oneui_bottom_padding)
+            )
             insets
         }
 
@@ -136,11 +147,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
+        binding.btnRefreshIcon.setOnClickListener {
+            refreshMemoryUi()
+            refreshMemoryLimiterStatus()
+            appendLog("已刷新内存与系统状态")
+        }
+
+        binding.tvFooterGithub.setOnClickListener {
+            runCatching {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/fanyongxing/memorykiller17")))
+            }.onFailure { err ->
+                appendLog("无法打开浏览器：${err.message}")
+            }
+        }
+
         binding.btnRequestShizuku.setOnClickListener {
             if (!Shizuku.pingBinder()) {
                 runCatching { ShizukuProvider.requestBinderForNonProviderProcess(this) }
                 if (!Shizuku.pingBinder()) {
-                    appendLog("未检测到运行中的 Shizuku 服务。请先在 Shizuku 中通过“无线调试”启动服务，再点击此按钮重试。")
+                    appendLog("未检测到运行中的 Shizuku，请先通过无线调试启动 Shizuku 后重试。")
                     return@setOnClickListener
                 }
             }
@@ -151,28 +176,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnRefreshMem.setOnClickListener {
-            refreshMemoryUi()
-            refreshMemoryLimiterStatus()
-        }
-
-        // 方案 1：100% 原版 libhello-jni.so 引擎
-        binding.btnOrigEngine.setOnClickListener {
-            launchEatEngine(useOriginalSo = true, useMmapEngine = false)
-        }
-
-        // 方案 2：独立 mmap 高熵防 ZRAM 压缩引擎 (libeatmem.so)
-        binding.btnMmapEngine.setOnClickListener {
-            launchEatEngine(useOriginalSo = false, useMmapEngine = true)
-        }
-
-        // 方案 3：原版 + mmap 双引擎极限清场
-        binding.btnDualEngine.setOnClickListener {
+        // 主操作胶囊按钮：一键执行最彻底的“双引擎清场”
+        binding.btnQuickClean.setOnClickListener {
             launchEatEngine(useOriginalSo = true, useMmapEngine = true)
         }
 
-        // 备用：系统级 am kill-all
-        binding.btnSafeKillAll.setOnClickListener {
+        // One UI 分组列表项：三种吃内存方案 + 备用系统级清理
+        binding.rowOrigEngine.setOnClickListener {
+            launchEatEngine(useOriginalSo = true, useMmapEngine = false)
+        }
+
+        binding.rowMmapEngine.setOnClickListener {
+            launchEatEngine(useOriginalSo = false, useMmapEngine = true)
+        }
+
+        binding.rowDualEngine.setOnClickListener {
+            launchEatEngine(useOriginalSo = true, useMmapEngine = true)
+        }
+
+        binding.rowSafeKillAll.setOnClickListener {
             val svc = cleanerService
             if (svc == null) {
                 appendLog("请先连接 Shizuku 后再执行系统级 am kill-all。")
@@ -187,7 +209,8 @@ class MainActivity : AppCompatActivity() {
                 val after = MemoryStatsHelper.readSnapshot(this@MainActivity)
                 refreshMemoryUi()
                 val diff = after.availableBytes - before.availableBytes
-                appendLog("$msg\n可用内存变化：${if (diff >= 0) "+" else "-"}${MemoryStatsHelper.formatMb(kotlin.math.abs(diff))}")
+                val sign = if (diff >= 0) "+" else "-"
+                appendLog("$msg（可用内存 $sign${MemoryStatsHelper.formatGb(kotlin.math.abs(diff))}）")
             }
         }
     }
@@ -196,13 +219,14 @@ class MainActivity : AppCompatActivity() {
         if (isEating) return
         val svc = cleanerService
         if (svc == null) {
-            appendLog("Shizuku 尚未就绪！请先连接 Shizuku。")
+            appendLog("Shizuku 尚未就绪，请先点击下方“授权 Shizuku”。")
             tryBindUserServiceIfPermitted()
             return
         }
 
         isEating = true
-        setActionButtonsEnabled(false)
+        setActionEnabled(false)
+        binding.btnQuickClean.text = "正在清场…"
 
         eatMonitorJob?.cancel()
         eatMonitorJob = lifecycleScope.launch {
@@ -211,22 +235,18 @@ class MainActivity : AppCompatActivity() {
 
             val prepMsg = withContext(Dispatchers.IO) {
                 runCatching { svc.prepareEatAndWatch(myUid, myPid, true) }
-                    .getOrElse { "解除限制异常：${it.message}" }
+                    .getOrElse { "准备阶段异常：${it.message}" }
             }
             appendLog(prepMsg)
-            refreshMemoryLimiterStatus()
 
             if (useOriginalSo) {
-                appendLog("已启动【原版引擎】：libhello-jni.so -> native_eatmf()")
-                runCatching {
-                    OriginalEatMem().native_eatmf()
-                }.onFailure { err ->
-                    appendLog("调用原版 libhello-jni.so 失败：${err.message}")
-                }
+                appendLog("启动原版引擎 (libhello-jni.so)…")
+                runCatching { OriginalEatMem().native_eatmf() }
+                    .onFailure { appendLog("原版引擎异常：${it.message}") }
             }
 
             if (useMmapEngine) {
-                appendLog("已启动【mmap 高熵防 ZRAM 引擎】：libeatmem.so (6 线程 x 8MB 不可压缩随机填充)")
+                appendLog("启动 mmap 高熵引擎 (libeatmem.so, 6 线程)…")
                 NativeMemoryEater.startEating(threadCount = 6, chunkMb = 8)
             }
 
@@ -252,22 +272,45 @@ class MainActivity : AppCompatActivity() {
     private fun refreshMemoryUi() {
         val snap = MemoryStatsHelper.readSnapshot(this)
         val mmapMb = NativeMemoryEater.getAllocatedMb()
-        binding.progressRam.setProgressCompat(snap.usedPercent, true)
-        binding.tvRamSummary.text =
-            "已用 ${MemoryStatsHelper.formatMb(snap.usedBytes)} / 总计 ${MemoryStatsHelper.formatMb(snap.totalBytes)} (${snap.usedPercent}%)"
-        val swapTotalMb = snap.swapTotalKb / 1024
-        val swapUsedMb = snap.swapUsedKb / 1024
-        binding.tvRamDetail.text =
-            "可用 RAM：${MemoryStatsHelper.formatMb(snap.availableBytes)}  |  mmap 已占：${mmapMb} MB  |  ZRAM：${swapUsedMb}/${swapTotalMb} MB  |  Android ${Build.VERSION.RELEASE}"
+
+        binding.ringRamProgress.setProgressCompat(snap.usedPercent, true)
+        binding.tvRamPercent.text = "${snap.usedPercent}%"
+
+        val (statusLabel, colorRes) = when {
+            snap.usedPercent >= 85 -> "紧张" to R.color.oneui_danger
+            snap.usedPercent >= 70 -> "偏高" to R.color.oneui_warning
+            else -> "良好" to R.color.oneui_blue
+        }
+        val tintColor = ContextCompat.getColor(this, colorRes)
+        binding.ringRamProgress.setIndicatorColor(tintColor)
+        binding.tvRamHealthBadge.text = statusLabel
+        binding.tvRamHealthBadge.setTextColor(tintColor)
+
+        binding.tvRamPrimary.text =
+            "${MemoryStatsHelper.formatGb(snap.usedBytes)} / ${MemoryStatsHelper.formatGb(snap.totalBytes)}"
+        binding.tvRamAvailable.text = "可用 ${MemoryStatsHelper.formatGb(snap.availableBytes)}"
+
+        val swapTotalGb = snap.swapTotalKb / (1024.0 * 1024.0)
+        val swapUsedGb = snap.swapUsedKb / (1024.0 * 1024.0)
+        val mmapText = if (mmapMb > 0) " · mmap ${mmapMb} MB" else ""
+        binding.tvSwapInfo.text = String.format(
+            "RAM Plus (ZRAM)：已用 %.1f / %.1f GB%s",
+            swapUsedGb, swapTotalGb, mmapText
+        )
     }
 
     private fun refreshMemoryLimiterStatus() {
         val svc = cleanerService ?: return
         lifecycleScope.launch {
             val status = withContext(Dispatchers.IO) {
-                runCatching { svc.memoryLimiterStatus }.getOrElse { "读取失败：${it.message}" }
+                runCatching { svc.memoryLimiterStatus }.getOrElse { "读取失败" }
             }
-            binding.tvLimiterStatus.text = "Android 17 Memory Limiter 实时状态：\n$status"
+            val friendly = if (status.contains("disabled", ignoreCase = true)) {
+                "Android 17 Memory Limiter：disabled（当前固件未启用单应用限制）"
+            } else {
+                "Android 17 Memory Limiter：$status"
+            }
+            binding.tvLimiterStatus.text = friendly
         }
     }
 
@@ -277,27 +320,68 @@ class MainActivity : AppCompatActivity() {
             Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }.getOrDefault(false)
 
-        val statusText = when {
-            !running -> "Shizuku 状态：未运行（请先通过无线调试启动 Shizuku）"
-            !granted -> "Shizuku 状态：已运行，待授权"
-            cleanerService == null -> "Shizuku 状态：已授权，正在绑定特权服务…"
-            else -> "Shizuku 状态：已就绪（本应用 UID=${Process.myUid()}，清理结束后自动恢复限制并回桌面）"
+        val ready = granted && cleanerService != null
+
+        when {
+            !running -> {
+                binding.tvShizukuBadge.text = "未运行"
+                binding.tvShizukuBadge.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.oneui_badge_neutral_bg))
+                binding.tvShizukuBadge.setTextColor(ContextCompat.getColor(this, R.color.oneui_text_secondary))
+                binding.tvShizukuDesc.text = "请先在 Shizuku 中通过无线调试启动服务"
+                binding.btnRequestShizuku.visibility = View.VISIBLE
+            }
+            !granted -> {
+                binding.tvShizukuBadge.text = "待授权"
+                binding.tvShizukuBadge.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.oneui_badge_warn_bg))
+                binding.tvShizukuBadge.setTextColor(ContextCompat.getColor(this, R.color.oneui_warning))
+                binding.tvShizukuDesc.text = "已检测到 Shizuku，点击右侧按钮完成授权"
+                binding.btnRequestShizuku.visibility = View.VISIBLE
+            }
+            !ready -> {
+                binding.tvShizukuBadge.text = "连接中"
+                binding.tvShizukuBadge.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.oneui_badge_blue_bg))
+                binding.tvShizukuBadge.setTextColor(ContextCompat.getColor(this, R.color.oneui_blue))
+                binding.tvShizukuDesc.text = "正在绑定 Shizuku 特权守护服务…"
+                binding.btnRequestShizuku.visibility = View.VISIBLE
+            }
+            else -> {
+                binding.tvShizukuBadge.text = "已就绪"
+                binding.tvShizukuBadge.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.oneui_badge_ok_bg))
+                binding.tvShizukuBadge.setTextColor(ContextCompat.getColor(this, R.color.oneui_success))
+                binding.tvShizukuDesc.text =
+                    "UID ${Process.myUid()} · Android ${Build.VERSION.RELEASE} · 退出自动恢复限制并回桌面"
+                binding.btnRequestShizuku.visibility = View.GONE
+            }
         }
-        binding.tvShizukuStatus.text = statusText
-        binding.btnRequestShizuku.isEnabled = !granted || cleanerService == null
-        setActionButtonsEnabled(!isEating && cleanerService != null)
+
+        setActionEnabled(!isEating && ready)
     }
 
-    private fun setActionButtonsEnabled(enabled: Boolean) {
-        binding.btnOrigEngine.isEnabled = enabled
-        binding.btnMmapEngine.isEnabled = enabled
-        binding.btnDualEngine.isEnabled = enabled
-        binding.btnSafeKillAll.isEnabled = enabled
+    private fun setActionEnabled(enabled: Boolean) {
+        val alpha = if (enabled) 1.0f else 0.45f
+        binding.btnQuickClean.isEnabled = enabled
+        listOf(
+            binding.rowOrigEngine,
+            binding.rowMmapEngine,
+            binding.rowDualEngine,
+            binding.rowSafeKillAll
+        ).forEach { row ->
+            row.isEnabled = enabled
+            row.alpha = alpha
+        }
     }
 
     private fun appendLog(message: String) {
         val prev = binding.tvLog.text?.toString().orEmpty()
-        binding.tvLog.text = if (prev.isBlank()) message else "$message\n\n$prev"
+        binding.tvLog.text = if (prev.isBlank() || prev == "等待操作") {
+            "• $message"
+        } else {
+            "• $message\n$prev"
+        }
     }
 
     companion object {
